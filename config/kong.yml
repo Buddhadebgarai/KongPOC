@@ -1,12 +1,231 @@
 _format_version: "3.0"
 _transform: true
 
+# Health check endpoint (no auth required)
 services:
+  - name: health-service
+    url: http://localhost:8000/
+    routes:
+      - name: health-route
+        paths:
+          - /health
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - '*'
+          credentials: true
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+
+  # Users Service (port 8080)
   - name: users-service
     url: http://host.docker.internal:8080/api/v1/users/
     routes:
       - name: users-route
         methods:
           - GET
+          - POST
+          - PUT
+          - DELETE
         paths:
           - /users
+    plugins:
+      # JWT Authentication
+      - name: jwt
+        config:
+          key_claim_name: kid
+          secret_is_base64: false
+
+      
+      # Rate Limiting (10 requests per minute)
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          hide_client_headers: false
+      
+      # Request/Response Transformation
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: users-service"
+              - "X-Environment: dev"
+      
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: users-service"
+              - "X-Environment: dev"
+      
+      # CORS
+      - name: cors
+        config:
+          origins:
+            - '*'
+          credentials: true
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+      
+
+
+  # Products Service (port 8081)
+  - name: products-service
+    url: http://host.docker.internal:8081/api/v1/products/
+    routes:
+      - name: products-route
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        paths:
+          - /products
+    plugins:
+      # JWT Authentication
+      - name: jwt
+        config:
+          key_claim_name: kid
+          secret_is_base64: false
+
+      
+      # Rate Limiting (10 requests per minute)
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          hide_client_headers: false
+      
+      # Request/Response Transformation
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: products-service"
+              - "X-Environment: dev"
+            
+      
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: products-service"
+              - "X-Environment: dev"
+
+            
+      
+      # CORS
+      - name: cors
+        config:
+          origins:
+            - '*'
+          credentials: true
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+
+  # Orders Service (port 8082)
+  - name: orders-service
+    url: http://host.docker.internal:8082/api/v1/orders/
+    routes:
+      - name: orders-route
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        paths:
+          - /orders
+    plugins:
+      # JWT Authentication
+      - name: jwt
+        config:
+          key_claim_name: kid
+          secret_is_base64: false
+
+      
+      # Rate Limiting (10 requests per minute)
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          hide_client_headers: false
+      
+      # Request/Response Transformation
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: orders-service"
+              - "X-Environment: dev"
+        
+      
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Service-Name: orders-service"
+              - "X-Environment: dev"
+      
+      # CORS
+      - name: cors
+        config:
+          origins:
+            - '*'
+          credentials: true
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+      
+
+
+consumers:
+  - username: poc-user
+    custom_id: poc-user-1
+    jwt_secrets:
+      - key: poc-key
+        secret: my-super-secret-key-1234567890123456
+
